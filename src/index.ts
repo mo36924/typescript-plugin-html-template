@@ -42,8 +42,6 @@ export default (options?: Options): TransformerFactory<SourceFile> => {
       node = ts.visitEachChild(node, visitor, context);
 
       if (ts.isTaggedTemplateExpression(node) && ts.isIdentifier(node.tag) && node.tag.text === "html") {
-        const sourceFile = node.getSourceFile();
-
         if (ts.isNoSubstitutionTemplateLiteral(node.template)) {
           return context.factory.createTaggedTemplateExpression(
             node.tag,
@@ -52,13 +50,16 @@ export default (options?: Options): TransformerFactory<SourceFile> => {
           );
         }
 
-        const sourceCode = sourceFile.getFullText();
+        const sourceCode = sourceFile.text;
         const prefix = "_".repeat(sourceCode.length);
         const { head, templateSpans } = node.template;
 
         const html = transformHtml(
           sourceFile.fileName,
-          templateSpans.reduce((previous, current, i) => `${previous}${prefix}${i}${prefix}${current}`, head.text),
+          templateSpans.reduce(
+            (previous, current, i) => `${previous}${prefix}${i}${prefix}${current.literal.text}`,
+            head.text,
+          ),
         );
 
         const parts = html.split(new RegExp(`${prefix}(\\d+)${prefix}`, "g"));
