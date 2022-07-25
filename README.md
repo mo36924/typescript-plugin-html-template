@@ -1,0 +1,1 @@
+# typescript-plugin-html-template
