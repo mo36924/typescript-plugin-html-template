@@ -43,10 +43,11 @@ export default (options?: Options): TransformerFactory<SourceFile> => {
 
       if (ts.isTaggedTemplateExpression(node) && ts.isIdentifier(node.tag) && node.tag.text === "html") {
         if (ts.isNoSubstitutionTemplateLiteral(node.template)) {
+          const html = transformHtml(sourceFile.fileName, node.template.text);
           return context.factory.createTaggedTemplateExpression(
             node.tag,
             node.typeArguments,
-            context.factory.createNoSubstitutionTemplateLiteral(transformHtml(sourceFile.fileName, node.template.text)),
+            context.factory.createNoSubstitutionTemplateLiteral(html, html),
           );
         }
 
@@ -74,13 +75,13 @@ export default (options?: Options): TransformerFactory<SourceFile> => {
           node.tag,
           node.typeArguments,
           context.factory.createTemplateExpression(
-            context.factory.createTemplateHead(headText),
+            context.factory.createTemplateHead(headText, headText),
             templateTexts.map((text, i) =>
               context.factory.createTemplateSpan(
                 expressions[i],
                 i === templateTexts.length - 1
-                  ? context.factory.createTemplateTail(text)
-                  : context.factory.createTemplateMiddle(text),
+                  ? context.factory.createTemplateTail(text, text)
+                  : context.factory.createTemplateMiddle(text, text),
               ),
             ),
           ),
