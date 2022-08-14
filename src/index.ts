@@ -52,7 +52,10 @@ export default (options?: Options): TransformerFactory<SourceFile> => {
         }
 
         const sourceCode = sourceFile.text;
-        const prefix = "_".repeat(sourceCode.length);
+        let prefix = "";
+
+        while (sourceCode.includes((prefix += "_"))) {}
+
         const { head, templateSpans } = node.template;
 
         const html = transformHtml(
